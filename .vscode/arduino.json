@@ -1,5 +1,5 @@
 {
-    "sketch": "main.ino",
+    "sketch": "air-purifier-iot.ino",
     "output": "build",
     "board": "esp32:esp32:esp32doit-devkit-v1",
     "intelliSenseGen": "enable",

@@ -5,7 +5,7 @@
 // ===== WiFi & MQTT =====
 const char* WIFI_SSID   = "Arya's A55";   // di alat asli: ganti ke WiFi/hotspot HP
 const char* WIFI_PASS   = "buburgoreng";
-const char* MQTT_SERVER = "broker.hivemq.com";
+const char* MQTT_SERVER = "10.31.38.212";
 const int   MQTT_PORT   = 1883;
 
 #define TOPIC_DATA   "uas-iot-kelompokX/air/data"      // ESP32 kirim JSON ke sini
@@ -43,20 +43,35 @@ void setRelay(bool on) {
   digitalWrite(PIN_RELAY_KIPAS, level ? HIGH : LOW);
 }
 
+// Dipakai oleh MQTT (dashboard) dan Serial Monitor (tes manual)
+void perintahKipas(String msg, const char* sumber) {
+  msg.trim();
+  msg.toUpperCase();
+
+  if (msg == "ON") kipasMode = 1;
+  else if (msg == "OFF") kipasMode = 2;
+  else if (msg == "AUTO") kipasMode = 0;
+  else return;
+
+  Serial.print("Perintah kipas dari ");
+  Serial.print(sumber);
+  Serial.print(": ");
+  Serial.println(msg);
+}
+
 // Dipanggil saat ada pesan masuk dari HP
 void onMessage(char* topic, byte* payload, unsigned int length) {
   String msg;
   for (unsigned int i = 0; i < length; i++) msg += (char)payload[i];
-  msg.trim();
-  msg.toUpperCase();
 
-  if (String(topic) == TOPIC_KIPAS) {
-    if (msg == "ON") kipasMode = 1;
-    else if (msg == "OFF") kipasMode = 2;
-    else if (msg == "AUTO") kipasMode = 0;
-    Serial.print("Perintah kipas dari dashboard: ");
-    Serial.println(msg);
-  }
+  if (String(topic) == TOPIC_KIPAS) perintahKipas(msg, "dashboard");
+}
+
+// Ketik ON / OFF / AUTO di Serial Monitor untuk tes kipas
+void cekSerial() {
+  if (!Serial.available()) return;
+  String msg = Serial.readStringUntil('\n');
+  perintahKipas(msg, "serial");
 }
 
 void connectWiFi() {
@@ -112,6 +127,7 @@ void setup() {
 void loop() {
   connectMQTT();
   client.loop();   // wajib dipanggil terus agar pesan masuk terbaca
+  cekSerial();
 
   if (millis() - waktuBaca < INTERVAL_BACA) return;
   waktuBaca = millis();
@@ -122,7 +138,7 @@ void loop() {
   int ppm = map(analogRead(PIN_GAS), 0, 4095, 0, 1000);
 
   if (isnan(temp) || isnan(hum)) {
-    Serial.println("Error: Sensor DHT22 tidak terbaca!");
+    Serial.println("Error: Sensor DHT22 tid adwwak terbaca!");
     return;
   }
 

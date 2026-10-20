@@ -11,7 +11,7 @@
       {
         // Run whenever any file is saved
         "match": ".ino",
-        "cmd": "arduino-cli compile --fqbn arduino:avr:mega -e --output-dir build/"
+        "cmd": "arduino-cli compile --fqbn esp32:esp32:esp32doit-devkit-v1 -e --output-dir build/"
       },
     ],
   }
