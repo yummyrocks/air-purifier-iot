@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UAS-IOT</title>
+  <!-- Tailwind CSS & MQTT.js via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen p-6 font-sans">
+
+  <div class="max-w-3xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
+      <div>
+        <h1 class="text-2xl font-bold text-sky-400">Dashboard</h1>
+        <p class="text-xs text-slate-400">Smart Air Quality Monitor</p>
+      </div>
+      <div id="status-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-600 text-gray-200">
+        DISCONNECTED
+      </div>
+    </div>
+
+    <!-- Cards Data Sensor -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
+        <span class="text-slate-400 text-sm">Suhu</span>
+        <div id="val-suhu" class="text-3xl font-bold my-2 text-amber-400">-- °C</div>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
+        <span class="text-slate-400 text-sm">Kelembapan</span>
+        <div id="val-hum" class="text-3xl font-bold my-2 text-blue-400">-- %</div>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 text-center">
+        <span class="text-slate-400 text-sm">Polusi (PPM)</span>
+        <div id="val-ppm" class="text-3xl font-bold my-2 text-emerald-400">-- PPM</div>
+      </div>
+    </div>
+
+    <!-- Status Udara & Kipas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-slate-400 text-sm">Status Udara</span>
+        <div id="val-status" class="text-2xl font-bold mt-2 text-gray-300">UNKNOWN</div>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+        <span class="text-slate-400 text-sm">Status Kipas & Mode</span>
+        <div class="flex justify-between items-center mt-2">
+          <div id="val-kipas" class="text-xl font-bold text-gray-300">KIPAS: --</div>
+          <div id="val-mode" class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">MODE: --</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel Kontrol Kipas -->
+    <div class="bg-slate-800 p-5 rounded-xl border border-slate-700">
+      <h3 class="text-sm font-semibold text-slate-300 mb-3">Kontrol Kipas Manual / Auto</h3>
+      <div class="grid grid-cols-3 gap-3">
+        <button onclick="sendCmd('AUTO')" class="bg-indigo-600 hover:bg-indigo-500 py-2 rounded-lg font-bold text-sm transition">AUTO</button>
+        <button onclick="sendCmd('ON')" class="bg-emerald-600 hover:bg-emerald-500 py-2 rounded-lg font-bold text-sm transition">ON</button>
+        <button onclick="sendCmd('OFF')" class="bg-rose-600 hover:bg-rose-500 py-2 rounded-lg font-bold text-sm transition">OFF</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Konfigurasi Topic (Wajib sama dengan ESP32)
+    const TOPIC_DATA  = "uas-iot-kelompokX/air/data";
+    const TOPIC_KIPAS = "uas-iot-kelompokX/air/kipas/set";
+    const TOPIC_STATUS= "uas-iot-kelompokX/air/status";
+
+    // Koneksi ke HiveMQ via WebSockets (Port 8000)
+    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
+
+    const badge = document.getElementById('status-badge');
+
+    client.on('connect', () => {
+      badge.innerText = 'ONLINE';
+      badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500 text-white';
+      client.subscribe(TOPIC_DATA);
+      client.subscribe(TOPIC_STATUS);
+    });
+
+    client.on('offline', () => {
+      badge.innerText = 'OFFLINE';
+      badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-rose-500 text-white';
+    });
+
+    // Menerima data JSON dari ESP32
+    client.on('message', (topic, message) => {
+      if (topic === TOPIC_DATA) {
+        try {
+          const data = JSON.parse(message.toString());
+          document.getElementById('val-suhu').innerText = data.suhu + ' °C';
+          document.getElementById('val-hum').innerText = data.kelembapan + ' %';
+          document.getElementById('val-ppm').innerText = data.ppm + ' PPM';
+          document.getElementById('val-status').innerText = data.status;
+          document.getElementById('val-kipas').innerText = 'KIPAS: ' + data.kipas;
+          document.getElementById('val-mode').innerText = 'MODE: ' + data.mode;
+        } catch (e) {
+          console.error('Format JSON salah', e);
+        }
+      }
+    });
+
+    // Kirim Perintah ON / OFF / AUTO
+    function sendCmd(cmd) {
+      client.publish(TOPIC_KIPAS, cmd);
+    }
+  </script>
+</body>
+</html>

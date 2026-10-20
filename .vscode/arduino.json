@@ -1,0 +1,8 @@
+{
+    "sketch": "main.ino",
+    "output": "build",
+    "board": "esp32:esp32:esp32doit-devkit-v1",
+    "intelliSenseGen": "enable",
+    "configuration": "FlashFreq=80,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
+    "programmer": "esptool"
+}

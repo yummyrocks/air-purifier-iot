@@ -1,0 +1,18 @@
+{
+  "files.associations": {
+    "*.ino": "cpp"
+  },
+  "arduino.useArduinoCli": true,
+  "arduino.path": "/usr/bin",
+  "arduino.commandPath": "arduino-cli",
+  "emeraldwalk.runonsave": {
+    
+    "commands": [
+      {
+        // Run whenever any file is saved
+        "match": ".ino",
+        "cmd": "arduino-cli compile --fqbn arduino:avr:mega -e --output-dir build/"
+      },
+    ],
+  }
+}
