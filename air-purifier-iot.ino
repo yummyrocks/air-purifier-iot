@@ -2,29 +2,26 @@
 #include <DHT.h>
 
 
-const int DHTPIN = 21;
-const int PIN_GAS = 34;
-const int PIN_LED= 4;
+const int PIN_RELAY = 21;
 
 
 void setup() {
   Serial.begin(115200);
 
-  pinMode(PIN_GAS, INPUT);
-  pinMode(PIN_LED,OUTPUT);
+  // pinMode(PIN_DHT22, INPUT);
+  pinMode(PIN_REPLAY,OUTPUT);
 
 
   Serial.println("=== SMART AIR QUALITY MONITOR - ESP32 + MQTT ===");
 }
 
 void loop() {
-  int ppm = map(analogRead(PIN_GAS), 0, 4095, 0, 1000);
-
-  Serial.println(ppm);
-
-  if (ppm > 390)
-  {
-    digitalWrite(PIN_LED,HIGH);
-  }else {digitalWrite(PIN_LED,LOW);}
+  float temp = dht.readTemperature();
+  float humidity = dht.readHumidity();
   
+  Serial.print("Temperature: ");
+  Serial.print(temp);
+  Serial.print(" C | Humidity: ");
+  Serial.print(humidity);
+  Serial.println(" %");
 }
