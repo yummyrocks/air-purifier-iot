@@ -2,7 +2,7 @@
 #include <PubSubClient.h>
 #include <DHT.h>
 
-// ===== WiFi & MQTT =====
+// // ===== WiFi & MQTT =====
 const char* WIFI_SSID   = "Arya's A55";   // di alat asli: ganti ke WiFi/hotspot HP
 const char* WIFI_PASS   = "buburgoreng";
 const char* MQTT_SERVER = "10.31.38.212";
@@ -14,13 +14,13 @@ const int   MQTT_PORT   = 1883;
 #define TOPIC_LED    "uas-iot-kelompokX/air/led/set"    // HP kirim: AUTO / MERAH / HIJAU / OFF
 
 // ===== Pin =====
-#define DHTPIN 21
+const int DHTPIN = 21;
 #define DHTTYPE DHT22
-#define PIN_GAS 34
-#define PIN_RELAY_KIPAS 19
-// #define PIN_BUZZER 27
-#define PIN_LED_MERAH 27
-#define PIN_LED_HIJAU 18
+const int PIN_GAS = 34;
+const int PIN_RELAY_KIPAS = 19;
+#define PIN_BUZZER 27
+const int PIN_LED_MERAH = 4;
+const int PIN_LED_HIJAU = 23;
 
 // ===== Pengaturan =====
 #define RELAY_ACTIVE_LOW false
@@ -51,7 +51,7 @@ void setLed() {
   digitalWrite(PIN_LED_MERAH, merah ? HIGH : LOW);
   digitalWrite(PIN_LED_HIJAU, hijau ? HIGH : LOW);
 }
-hijau
+
 void perintahLed(String msg, const char* sumber) {
   msg.trim();
   msg.toUpperCase();
@@ -66,7 +66,7 @@ void perintahLed(String msg, const char* sumber) {
 
   Serial.print("Perintah LED dari ");
   Serial.print(sumber);
-  Serial.print(": ");for
+  Serial.print(": ");
   Serial.println(msg);
 }
 
@@ -100,16 +100,6 @@ void cekSerial() {
   if (!Serial.available()) return;
   String msg = Serial.readStringUntil('\n');
   perintahKipas(msg, "serial");
-}
-
-void connectWiFi() {
-  Serial.print("Menyambung WiFi");
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(300);
-    Serial.print(".");
-  }
-  Serial.println(" tersambung!");
 }
 
 void connectMQTT() {
@@ -161,9 +151,20 @@ void loop() {
   waktuBaca = millis();
 
   // Baca sensor
-  // float temp = dht.readTemperature();
-  // float hum = dht.readHumidity();
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
   int ppm = map(analogRead(PIN_GAS), 0, 4095, 0, 1000);
+
+  if (isnan(temp) || isnan(hum)) {
+    Serial.println("Error: Sensor DHT22 tid adwwak terbaca!");
+    return;
+  }
+
+  // Logika polusi dengan hysteresis
+  if (!statusBahaya && ppm > PPM_ON) statusBahaya = true;
+  else if (statusBahaya && ppm < PPM_OFF) statusBahaya = false;
+
+  bool tidakNyaman = (temp > SUHU_MAX) || (hum > HUM_MAX);
 
   // Kipas: ikut mode (AUTO / ON manual / OFF manual dari HP)
   bool kipasNyala;

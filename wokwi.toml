@@ -1,0 +1,4 @@
+[wokwi]
+version=1
+firmware='build/air-purifier-iot.ino.bin'
+elf='build/air-purifier-iot.ino.elf'
