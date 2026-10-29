@@ -1,25 +1,35 @@
-#include <PubSubClient.h>
+// Uji coba sensor DHT22 (ESP32)
+
 #include <DHT.h>
 
-constexpr int BUTTON_PIN = 21;
-constexpr int RELAY_PIN = 19;
+const int DHTPIN = 21;
+#define DHTTYPE DHT22
+const unsigned long INTERVAL_UJI = 2000;   // DHT22 minimal 2 detik
 
-// Assumes an active-low relay module.
-constexpr int RELAY_ON = LOW;
-constexpr int RELAY_OFF = HIGH;
+DHT dht(DHTPIN, DHTTYPE);
+unsigned long waktuUji = 0;
+
 void setup() {
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
-
-  digitalWrite(RELAY_PIN, RELAY_OFF);
-  pinMode(RELAY_PIN, OUTPUT);
+  Serial.begin(115200);
+  dht.begin();
+  Serial.println("=== UJI DHT22 ===");
 }
 
 void loop() {
-  bool buttonPressed = digitalRead(BUTTON_PIN) == HIGH;
-  if (buttonPressed)
-  {
-    Serial.println("aosdkowkdowkd");
+  if (millis() - waktuUji < INTERVAL_UJI) return;
+  waktuUji = millis();
+
+  float suhu = dht.readTemperature();
+  float hum = dht.readHumidity();
+
+  if (isnan(suhu) || isnan(hum)) {
+    Serial.println("Gagal membaca DHT22. Cek kabel dan pin data.");
+    return;
   }
-  
-  digitalWrite(RELAY_PIN, buttonPressed ? RELAY_ON : RELAY_OFF);
+
+  Serial.print("Suhu: ");
+  Serial.print(suhu, 1);
+  Serial.print(" C  |  Kelembapan: ");
+  Serial.print(hum, 1);
+  Serial.println(" %");
 }
