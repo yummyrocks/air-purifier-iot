@@ -5,7 +5,7 @@ void setup() {
 }
 
 void loop() {
-  tone(PIN_BUZZER, 3000);
+  tone(PIN_BUZZER, 5000);
   delay(1000);
   noTone(PIN_BUZZER);
   delay(1000);
