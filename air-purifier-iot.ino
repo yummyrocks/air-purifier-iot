@@ -3,8 +3,8 @@
 #include <DHT.h>
 
 // // ===== WiFi & MQTT =====
-const char* WIFI_SSID   = "Arya's A55";   // di alat asli: ganti ke WiFi/hotspot HP
-const char* WIFI_PASS   = "buburgoreng";
+const char* WIFI_SSID   = "OPPO Reno3";   // di alat asli: ganti ke WiFi/hotspot HP
+const char* WIFI_PASS   = "12345677";
 const char* MQTT_SERVER = "10.31.38.212";
 const int   MQTT_PORT   = 1883;
 
@@ -44,6 +44,17 @@ void setRelay(bool on) {
   bool level = RELAY_ACTIVE_LOW ? !on : on;
   digitalWrite(PIN_RELAY_KIPAS, level ? HIGH : LOW);
 }
+
+void connectWiFi() {
+  Serial.print("Menyambung WiFi");
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(300);
+    Serial.print(".");
+  }
+  Serial.println(" tersambung!");
+}
+
 
 void setLed() {
   bool merah = ledMode != 2 && ledMode != 3;
