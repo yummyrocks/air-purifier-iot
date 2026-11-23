@@ -5,7 +5,7 @@
 // ===== WiFi & MQTT =====
 const char* WIFI_SSID   = "Arya's A55";   // di alat asli: ganti ke WiFi/hotspot HP
 const char* WIFI_PASS   = "buburgoreng";
-const char* MQTT_SERVER = "10.31.38.212";
+const char* MQTT_SERVER = "mqtt-dashboard.com";
 const int   MQTT_PORT   = 1883;
 
 #define TOPIC_DATA   "uas-iot-kelompokX/air/data"      // ESP32 kirim JSON ke sini
