@@ -15,16 +15,16 @@ const int   MQTT_PORT   = 1883;
 // ===== Pin =====
 #define DHTPIN 15
 #define DHTTYPE DHT22
-#define PIN_GAS 2
+#define PIN_GAS 34
 #define PIN_RELAY_KIPAS 19
 #define PIN_BUZZER 27
-#define PIN_LED_MERAH 5
+#define PIN_LED_MERAH 32
 #define PIN_LED_HIJAU 18
 
 // ===== Pengaturan =====
 #define RELAY_ACTIVE_LOW false
-const int PPM_ON = 500;
-const int PPM_OFF = 450;
+const int PPM_ON = 300;
+const int PPM_OFF = 200;
 const float SUHU_MAX = 35.0;
 const float HUM_MAX = 80.0;
 const unsigned long INTERVAL_BACA = 2000;  // DHT22 minimal 2 detik
